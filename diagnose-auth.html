@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Auth Diagnostic Tool</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .status {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .status.pass {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status.fail {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .status.pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .error {
+            color: #dc3545;
+        }
+        .success {
+            color: #28a745;
+        }
+        .info {
+            color: #17a2b8;
+        }
+        .warning {
+            color: #ffc107;
+        }
+        .checklist {
+            list-style: none;
+            padding: 0;
+        }
+        .checklist li {
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .checklist li:before {
+            content: "❌ ";
+            margin-right: 10px;
+        }
+        .checklist li.checked:before {
+            content: "✅ ";
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Google Auth Diagnostic Tool</h1>
+        <p class="subtitle">This tool will help diagnose Google authentication issues</p>
+
+        <!-- Test 1: Firebase Loaded -->
+        <div class="test-section">
+            <h3>Test 1: Firebase SDK <span id="status1" class="status pending">Testing...</span></h3>
+            <div id="result1" class="result"></div>
+        </div>
+
+        <!-- Test 2: Firebase Config -->
+        <div class="test-section">
+            <h3>Test 2: Firebase Configuration <span id="status2" class="status pending">Testing...</span></h3>
+            <div id="result2" class="result"></div>
+        </div>
+
+        <!-- Test 3: Auth Provider -->
+        <div class="test-section">
+            <h3>Test 3: Google Auth Provider <span id="status3" class="status pending">Testing...</span></h3>
+            <button id="testGoogleAuth">Test Google Sign-In</button>
+            <div id="result3" class="result"></div>
+        </div>
+
+        <!-- Test 4: Browser Compatibility -->
+        <div class="test-section">
+            <h3>Test 4: Browser Compatibility <span id="status4" class="status pending">Testing...</span></h3>
+            <div id="result4" class="result"></div>
+        </div>
+
+        <!-- Recommendations -->
+        <div class="test-section">
+            <h3>📋 Setup Checklist</h3>
+            <ul id="checklist" class="checklist">
+                <li id="check1">Firebase project created</li>
+                <li id="check2">Google Sign-In enabled in Firebase Console</li>
+                <li id="check3">Authorized domains configured</li>
+                <li id="check4">config.js file exists with valid configuration</li>
+                <li id="check5">Popups allowed in browser</li>
+                <li id="check6">Third-party cookies enabled</li>
+            </ul>
+        </div>
+
+        <!-- Instructions -->
+        <div class="test-section">
+            <h3>📖 Next Steps</h3>
+            <div id="instructions" class="result info"></div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="config.js"></script>
+
+    <script>
+        let auth;
+        let testResults = {
+            firebase: false,
+            config: false,
+            auth: false,
+            browser: false
+        };
+
+        // Test 1: Firebase SDK
+        function test1() {
+            const result1 = document.getElementById('result1');
+            const status1 = document.getElementById('status1');
+            
+            try {
+                if (typeof firebase !== 'undefined') {
+                    result1.innerHTML = '<span class="success">✓ Firebase SDK loaded successfully</span>\n';
+                    result1.innerHTML += `Version: ${firebase.SDK_VERSION || 'Unknown'}`;
+                    status1.textContent = 'PASS';
+                    status1.className = 'status pass';
+                    testResults.firebase = true;
+                    document.getElementById('check1').classList.add('checked');
+                } else {
+                    throw new Error('Firebase is not defined');
+                }
+            } catch (error) {
+                result1.innerHTML = `<span class="error">✗ Firebase SDK not loaded</span>\n${error.message}`;
+                status1.textContent = 'FAIL';
+                status1.className = 'status fail';
+            }
+        }
+
+        // Test 2: Firebase Configuration
+        function test2() {
+            const result2 = document.getElementById('result2');
+            const status2 = document.getElementById('status2');
+            
+            try {
+                if (typeof firebaseConfig === 'undefined') {
+                    throw new Error('firebaseConfig is not defined. Make sure config.js exists and is loaded.');
+                }
+
+                const requiredFields = ['apiKey', 'authDomain', 'projectId'];
+                const missingFields = requiredFields.filter(field => 
+                    !firebaseConfig[field] || 
+                    firebaseConfig[field].includes('YOUR_') ||
+                    firebaseConfig[field] === ''
+                );
+
+                if (missingFields.length > 0) {
+                    throw new Error(`Missing or invalid config fields: ${missingFields.join(', ')}`);
+                }
+
+                result2.innerHTML = '<span class="success">✓ Firebase configuration valid</span>\n';
+                result2.innerHTML += `Project ID: ${firebaseConfig.projectId}\n`;
+                result2.innerHTML += `Auth Domain: ${firebaseConfig.authDomain}`;
+                status2.textContent = 'PASS';
+                status2.className = 'status pass';
+                testResults.config = true;
+                document.getElementById('check4').classList.add('checked');
+
+                // Initialize auth
+                auth = firebase.auth();
+            } catch (error) {
+                result2.innerHTML = `<span class="error">✗ Configuration error</span>\n${error.message}\n\n`;
+                result2.innerHTML += '<span class="warning">Action Required:</span>\n';
+                result2.innerHTML += '1. Copy config.example.js to config.js\n';
+                result2.innerHTML += '2. Fill in your Firebase configuration values\n';
+                result2.innerHTML += '3. Get config from Firebase Console → Project Settings';
+                status2.textContent = 'FAIL';
+                status2.className = 'status fail';
+            }
+        }
+
+        // Test 3: Google Auth
+        document.getElementById('testGoogleAuth').addEventListener('click', async function() {
+            const result3 = document.getElementById('result3');
+            const status3 = document.getElementById('status3');
+            const button = this;
+            
+            button.disabled = true;
+            button.textContent = 'Testing...';
+            result3.innerHTML = '<span class="info">Attempting Google sign-in...</span>';
+            
+            try {
+                if (!auth) {
+                    throw new Error('Firebase Auth not initialized. Fix previous errors first.');
+                }
+
+                const provider = new firebase.auth.GoogleAuthProvider();
+                provider.addScope('email');
+                provider.addScope('profile');
+                
+                result3.innerHTML += '\n<span class="info">Opening Google sign-in popup...</span>';
+                
+                const result = await auth.signInWithPopup(provider);
+                
+                result3.innerHTML = '<span class="success">✓ Google sign-in successful!</span>\n';
+                result3.innerHTML += `User: ${result.user.email}\n`;
+                result3.innerHTML += `UID: ${result.user.uid}`;
+                status3.textContent = 'PASS';
+                status3.className = 'status pass';
+                testResults.auth = true;
+                document.getElementById('check2').classList.add('checked');
+                document.getElementById('check3').classList.add('checked');
+                
+                // Sign out after test
+                setTimeout(() => {
+                    auth.signOut();
+                    result3.innerHTML += '\n\n<span class="info">Signed out for testing purposes</span>';
+                }, 2000);
+                
+            } catch (error) {
+                console.error('Auth error:', error);
+                result3.innerHTML = `<span class="error">✗ Google sign-in failed</span>\n`;
+                result3.innerHTML += `Error Code: ${error.code}\n`;
+                result3.innerHTML += `Error Message: ${error.message}\n\n`;
+                
+                // Provide specific guidance
+                result3.innerHTML += '<span class="warning">Troubleshooting:</span>\n';
+                
+                switch (error.code) {
+                    case 'auth/popup-blocked':
+                        result3.innerHTML += '• Your browser blocked the popup\n';
+                        result3.innerHTML += '• Click the popup icon in address bar and allow popups\n';
+                        result3.innerHTML += '• Or try a different browser';
+                        break;
+                    case 'auth/unauthorized-domain':
+                        result3.innerHTML += '• This domain is not authorized\n';
+                        result3.innerHTML += '• Go to Firebase Console → Authentication → Settings\n';
+                        result3.innerHTML += '• Add this domain to Authorized domains: ' + window.location.hostname;
+                        break;
+                    case 'auth/operation-not-allowed':
+                        result3.innerHTML += '• Google Sign-In is not enabled\n';
+                        result3.innerHTML += '• Go to Firebase Console → Authentication → Sign-in method\n';
+                        result3.innerHTML += '• Enable Google provider';
+                        break;
+                    case 'auth/popup-closed-by-user':
+                        result3.innerHTML += '• You closed the popup before completing sign-in\n';
+                        result3.innerHTML += '• Try again and complete the Google account selection';
+                        break;
+                    default:
+                        result3.innerHTML += '• Check Firebase Console for configuration issues\n';
+                        result3.innerHTML += '• Verify Google Sign-In is enabled\n';
+                        result3.innerHTML += '• Check browser console for more details';
+                }
+                
+                status3.textContent = 'FAIL';
+                status3.className = 'status fail';
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Test Google Sign-In';
+            }
+        });
+
+        // Test 4: Browser Compatibility
+        function test4() {
+            const result4 = document.getElementById('result4');
+            const status4 = document.getElementById('status4');
+            
+            const checks = [];
+            let allPass = true;
+
+            // Check cookies
+            const cookiesEnabled = navigator.cookieEnabled;
+            checks.push({
+                name: 'Cookies',
+                pass: cookiesEnabled,
+                message: cookiesEnabled ? 'Enabled' : 'Disabled (required for auth)'
+            });
+            if (!cookiesEnabled) allPass = false;
+
+            // Check localStorage
+            let localStorageAvailable = false;
+            try {
+                localStorage.setItem('test', 'test');
+                localStorage.removeItem('test');
+                localStorageAvailable = true;
+            } catch (e) {
+                localStorageAvailable = false;
+            }
+            checks.push({
+                name: 'LocalStorage',
+                pass: localStorageAvailable,
+                message: localStorageAvailable ? 'Available' : 'Not available (required for auth)'
+            });
+            if (!localStorageAvailable) allPass = false;
+
+            // Check popup support
+            checks.push({
+                name: 'Popup Support',
+                pass: true,
+                message: 'Supported (test with button above)'
+            });
+
+            // Browser info
+            const userAgent = navigator.userAgent;
+            let browserName = 'Unknown';
+            if (userAgent.indexOf('Chrome') > -1) browserName = 'Chrome';
+            else if (userAgent.indexOf('Safari') > -1) browserName = 'Safari';
+            else if (userAgent.indexOf('Firefox') > -1) browserName = 'Firefox';
+            else if (userAgent.indexOf('Edge') > -1) browserName = 'Edge';
+            
+            checks.push({
+                name: 'Browser',
+                pass: true,
+                message: browserName
+            });
+
+            // Display results
+            result4.innerHTML = checks.map(check => 
+                `<span class="${check.pass ? 'success' : 'error'}">${check.pass ? '✓' : '✗'} ${check.name}:</span> ${check.message}`
+            ).join('\n');
+
+            if (allPass) {
+                status4.textContent = 'PASS';
+                status4.className = 'status pass';
+                testResults.browser = true;
+                document.getElementById('check5').classList.add('checked');
+                document.getElementById('check6').classList.add('checked');
+            } else {
+                status4.textContent = 'FAIL';
+                status4.className = 'status fail';
+            }
+        }
+
+        // Generate instructions
+        function generateInstructions() {
+            const instructions = document.getElementById('instructions');
+            let text = '';
+
+            if (!testResults.firebase) {
+                text += '1. ❌ Firebase SDK not loaded\n';
+                text += '   → Check that Firebase scripts are included in HTML\n\n';
+            }
+
+            if (!testResults.config) {
+                text += '2. ❌ Firebase configuration invalid\n';
+                text += '   → Create config.js from config.example.js\n';
+                text += '   → Get config from Firebase Console\n\n';
+            }
+
+            if (!testResults.auth) {
+                text += '3. ⚠️ Google Auth not tested yet\n';
+                text += '   → Click "Test Google Sign-In" button above\n\n';
+            }
+
+            if (!testResults.browser) {
+                text += '4. ❌ Browser compatibility issues\n';
+                text += '   → Enable cookies and localStorage\n\n';
+            }
+
+            if (testResults.firebase && testResults.config && testResults.browser) {
+                text += '✅ Basic setup looks good!\n\n';
+                text += 'Next steps:\n';
+                text += '1. Test Google Sign-In using the button above\n';
+                text += '2. If it fails, follow the error-specific troubleshooting\n';
+                text += '3. Check GOOGLE_AUTH_TROUBLESHOOTING.md for detailed help\n';
+            }
+
+            instructions.textContent = text || 'All tests passed! ✅';
+        }
+
+        // Run tests on load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                test1();
+                setTimeout(() => {
+                    test2();
+                    setTimeout(() => {
+                        test4();
+                        generateInstructions();
+                    }, 500);
+                }, 500);
+            }, 500);
+        });
+    </script>
+</body>
+</html>

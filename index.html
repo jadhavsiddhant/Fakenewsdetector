@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fake News Detector - AI-Powered Verification</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Auth Modal -->
+    <div id="authModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="authTitle">Welcome to Fake News Detector</h2>
+            </div>
+            <div class="modal-body">
+                <div class="auth-tabs">
+                    <button class="auth-tab active" data-tab="login">Login</button>
+                    <button class="auth-tab" data-tab="signup">Sign Up</button>
+                </div>
+                
+                <!-- Login Form -->
+                <form id="loginForm" class="auth-form active">
+                    <div class="form-group">
+                        <label for="loginEmail">Email</label>
+                        <input type="email" id="loginEmail" placeholder="Enter your email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">Password</label>
+                        <input type="password" id="loginPassword" placeholder="Enter your password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </button>
+                    <div class="divider">OR</div>
+                    <button type="button" id="googleLoginBtn" class="btn btn-google">
+                        <i class="fab fa-google"></i> Continue with Google
+                    </button>
+                    <div id="loginError" class="error-message"></div>
+                </form>
+
+                <!-- Signup Form -->
+                <form id="signupForm" class="auth-form">
+                    <div class="form-group">
+                        <label for="signupEmail">Email</label>
+                        <input type="email" id="signupEmail" placeholder="Enter your email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signupPassword">Password</label>
+                        <input type="password" id="signupPassword" placeholder="Create a password (min 6 characters)" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signupPasswordConfirm">Confirm Password</label>
+                        <input type="password" id="signupPasswordConfirm" placeholder="Confirm your password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-user-plus"></i> Sign Up
+                    </button>
+                    <div class="divider">OR</div>
+                    <button type="button" id="googleSignupBtn" class="btn btn-google">
+                        <i class="fab fa-google"></i> Continue with Google
+                    </button>
+                    <div id="signupError" class="error-message"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="app" class="hidden">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-shield-alt"></i>
+                    <h1>Fake News Detector</h1>
+                </div>
+                <div class="user-info">
+                    <span id="userEmail" class="user-email"></span>
+                    <button id="logoutBtn" class="btn btn-secondary">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="container">
+                <!-- Checker Section -->
+                <section class="checker-section">
+                    <div class="checker-card">
+                        <h2 class="section-title">
+                            <i class="fas fa-search"></i> Verify News Claim
+                        </h2>
+                        <p class="section-subtitle">Enter a news headline or claim to check its authenticity using AI-powered verification</p>
+                        
+                        <div class="input-container">
+                            <textarea 
+                                id="newsInput" 
+                                placeholder="Enter news headline or claim to verify..."
+                                rows="4"
+                            ></textarea>
+                            <button id="checkBtn" class="btn btn-check">
+                                <i class="fas fa-check-circle"></i> Check Claim
+                            </button>
+                        </div>
+
+                        <!-- Sample Headlines -->
+                        <div class="sample-headlines">
+                            <p class="sample-label">Try these examples:</p>
+                            <div class="sample-chips">
+                                <button class="sample-chip" data-sample="Scientists discover new planet that could support life">Scientists discover new planet</button>
+                                <button class="sample-chip" data-sample="Breaking: Major tech company announces revolutionary AI breakthrough">Tech AI breakthrough</button>
+                                <button class="sample-chip" data-sample="Study shows drinking water improves health">Water improves health</button>
+                            </div>
+                        </div>
+
+                        <!-- Loading State -->
+                        <div id="loadingState" class="loading-state hidden">
+                            <div class="spinner"></div>
+                            <p>Analyzing claim with AI and verifying sources...</p>
+                        </div>
+
+                        <!-- Result Display -->
+                        <div id="resultContainer" class="result-container hidden">
+                            <div class="result-header">
+                                <div id="resultBadge" class="result-badge"></div>
+                                <div class="result-metrics">
+                                    <div class="metric">
+                                        <span class="metric-label">Confidence</span>
+                                        <span id="confidenceValue" class="metric-value"></span>
+                                    </div>
+                                    <div class="metric">
+                                        <span class="metric-label">Credibility Score</span>
+                                        <span id="credibilityValue" class="metric-value"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="result-explanation">
+                                <h3><i class="fas fa-info-circle"></i> Explanation</h3>
+                                <p id="resultExplanation"></p>
+                            </div>
+                            
+                            <div class="result-claim">
+                                <h3>Analyzed Claim:</h3>
+                                <p id="analyzedClaim"></p>
+                            </div>
+
+                            <div id="sourcesContainer" class="sources-container">
+                                <h3><i class="fas fa-link"></i> Supporting Sources</h3>
+                                <div id="sourcesList" class="sources-list"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- History Section -->
+                <section class="history-section">
+                    <div class="history-card">
+                        <h2 class="section-title">
+                            <i class="fas fa-history"></i> Verification History
+                        </h2>
+                        <div id="historyContainer" class="history-container">
+                            <div class="history-empty">
+                                <i class="fas fa-inbox"></i>
+                                <p>No verification history yet. Start by checking a news claim above!</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Powered by OpenRouter AI • Built with Firebase</p>
+        </footer>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <!-- App Scripts -->
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
