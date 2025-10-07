@@ -305,11 +305,8 @@ For issues and questions:
 
 ## 🙏 Acknowledgments
 
-- **Firebase** - Authentication and database
-- **OpenRouter** - AI model API access
-- **DeepSeek** - R1 language model
-- **Bing** - UI/UX inspiration
+- **Mentors & Friends**
 
 ---
 
-**Built with ❤️ using Vanilla JavaScript, Firebase, and AI**
+**Built with ❤️ using Vanilla JavaScript, Firebase, and Groq**
