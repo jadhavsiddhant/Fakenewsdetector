@@ -288,9 +288,6 @@ Edit the `verifyNewsHeuristic()` function in `script.js` to adjust keyword detec
 - [ ] Add export history to CSV/PDF
 - [ ] Create admin dashboard for analytics
 
-## 📝 License
-
-This project is open source and available under the MIT License.
 
 ## 🤝 Contributing
 
