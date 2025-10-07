@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fake News Detector - AI-Powered Fact Checker</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Authentication Section -->
+    <div id="authSection" class="auth-section">
+        <div class="auth-container">
+            <div class="auth-header">
+                <h1>🔍 Fake News Detector</h1>
+                <p>Fact checking with real-time web search</p>
+            </div>
+            
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-tab="login">Sign In</button>
+                <button class="auth-tab" data-tab="signup">Sign Up</button>
+            </div>
+
+            <!-- Login Form -->
+            <div id="loginForm" class="auth-form active">
+                <input type="email" id="loginEmail" placeholder="Email address" class="auth-input">
+                <input type="password" id="loginPassword" placeholder="Password" class="auth-input">
+                <button id="loginBtn" class="auth-btn primary">Sign In</button>
+                <div class="divider">
+                    <span>or</span>
+                </div>
+                <button id="googleLoginBtn" class="auth-btn google">
+                    <svg width="18" height="18" viewBox="0 0 18 18">
+                        <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/>
+                        <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/>
+                        <path fill="#FBBC05" d="M3.964 10.707c-.18-.54-.282-1.117-.282-1.707s.102-1.167.282-1.707V4.961H.957C.347 6.175 0 7.55 0 9s.348 2.825.957 4.039l3.007-2.332z"/>
+                        <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.961L3.964 7.293C4.672 5.163 6.656 3.58 9 3.58z"/>
+                    </svg>
+                    Continue with Google
+                </button>
+                <div id="loginError" class="error-message"></div>
+            </div>
+
+            <!-- Signup Form -->
+            <div id="signupForm" class="auth-form">
+                <input type="email" id="signupEmail" placeholder="Email address" class="auth-input">
+                <input type="password" id="signupPassword" placeholder="Password (min 6 characters)" class="auth-input">
+                <input type="password" id="signupPasswordConfirm" placeholder="Confirm password" class="auth-input">
+                <button id="signupBtn" class="auth-btn primary">Create Account</button>
+                <div class="divider">
+                    <span>or</span>
+                </div>
+                <button id="googleSignupBtn" class="auth-btn google">
+                    <svg width="18" height="18" viewBox="0 0 18 18">
+                        <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/>
+                        <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/>
+                        <path fill="#FBBC05" d="M3.964 10.707c-.18-.54-.282-1.117-.282-1.707s.102-1.167.282-1.707V4.961H.957C.347 6.175 0 7.55 0 9s.348 2.825.957 4.039l3.007-2.332z"/>
+                        <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.961L3.964 7.293C4.672 5.163 6.656 3.58 9 3.58z"/>
+                    </svg>
+                    Continue with Google
+                </button>
+                <div id="signupError" class="error-message"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App Section -->
+    <div id="appSection" class="app-section" style="display: none;">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <h1 class="logo">🔍 Fake News Detector</h1>
+                <div class="user-info">
+                    <span id="userEmail" class="user-email"></span>
+                    <button id="logoutBtn" class="logout-btn">Sign Out</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Search Section -->
+            <div class="search-section">
+                <div class="search-container">
+                    <div class="input-container">
+                        <div class="input-mode-indicator">
+                            <span id="inputModeText">📝 Text Mode</span>
+                        </div>
+                        <textarea 
+                            id="newsInput" 
+                            class="news-input" 
+                            placeholder="Enter a news headline, claim, or paste a URL to analyze..."
+                            rows="3"
+                        ></textarea>
+                        <div class="input-hint">
+                            <span id="inputHint">💡 Tip: Paste any URL to analyze the full article</span>
+                        </div>
+                    </div>
+                    <button id="checkNewsBtn" class="check-btn">
+                        <span class="btn-text">Check News</span>
+                        <span class="btn-icon">→</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Enhanced Loading Animation -->
+            <div id="loadingSection" class="loading-section" style="display: none;">
+                <div class="loading-container">
+                    <div class="loading-brain">
+                        <div class="brain-pulse"></div>
+                        <div class="brain-icon">🧠</div>
+                    </div>
+                    <div class="loading-dots">
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                    </div>
+                    <p class="loading-text">Detector is analyzing your claim...</p>
+                    <div class="loading-steps">
+                        <div class="step active" data-step="1">Processing text</div>
+                        <div class="step" data-step="2">Cross-referencing sources</div>
+                        <div class="step" data-step="3">Generating analysis</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enhanced Results Section -->
+            <div id="resultsSection" class="results-section" style="display: none;">
+                <div class="result-card">
+                    <div class="result-header">
+                        <div class="verdict-container">
+                            <div id="resultBadge" class="result-badge"></div>
+                            <div class="confidence-meter">
+                                <div class="confidence-label">Confidence Score</div>
+                                <div class="confidence-bar">
+                                    <div id="confidenceProgress" class="confidence-progress"></div>
+                                </div>
+                                <div id="resultConfidence" class="result-confidence"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="result-body">
+                        <div class="analysis-section">
+                            <div class="section-header">
+                                <div class="section-icon">📊</div>
+                                <h3>Web Search & Analysis</h3>
+                            </div>
+                            <div class="explanation-card">
+                                <p id="resultExplanation" class="result-explanation"></p>
+                            </div>
+                        </div>
+                        
+                        <div id="sourcesContainer" class="sources-container">
+                            <div class="section-header">
+                                <div class="section-icon">🔗</div>
+                                <h3>Verification Sources</h3>
+                            </div>
+                            <div id="sourcesList" class="sources-list"></div>
+                        </div>
+                    </div>
+                    <div class="result-footer">
+                        <button id="checkAnotherBtn" class="secondary-btn">
+                            <span>Check Another Claim</span>
+                            <span class="btn-arrow">↗</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- History Section -->
+            <div id="historySection" class="history-section">
+                <div class="history-header">
+                    <h2>Recent Checks</h2>
+                    <button id="toggleHistoryBtn" class="toggle-history-btn">
+                        <span id="historyToggleIcon">▼</span>
+                    </button>
+                </div>
+                <div id="historyList" class="history-list"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <!-- App Scripts -->
+    <script src="config.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

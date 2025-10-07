@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenRouter API Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #333; }
+        button {
+            background: #0078d4;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover { background: #106ebe; }
+        #output {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .success { color: #107c10; font-weight: bold; }
+        .error { color: #d13438; font-weight: bold; }
+        .info { color: #0078d4; }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 OpenRouter API Test</h1>
+        <p>Test your OpenRouter API connection and DeepSeek R1 model</p>
+        
+        <input type="text" id="testClaim" placeholder="Enter a test news claim..." value="The Earth is round">
+        
+        <div>
+            <button onclick="testAPI()">Test API Connection</button>
+            <button onclick="testSimple()">Test Simple Request</button>
+            <button onclick="clearOutput()">Clear Output</button>
+        </div>
+        
+        <div id="output">Click a button to test the API...</div>
+    </div>
+
+    <script src="config.js"></script>
+    <script>
+        const output = document.getElementById('output');
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : 'info';
+            output.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            output.scrollTop = output.scrollHeight;
+        }
+        
+        function clearOutput() {
+            output.innerHTML = '';
+        }
+        
+        async function testSimple() {
+            clearOutput();
+            log('=== SIMPLE API TEST ===', 'info');
+            log(`API URL: ${OPENROUTER_API_URL}`);
+            log(`Model: ${OPENROUTER_MODEL}`);
+            log(`API Key: ${OPENROUTER_API_KEY.substring(0, 20)}...`);
+            log('');
+            
+            try {
+                log('Sending request...', 'info');
+                
+                const response = await fetch(OPENROUTER_API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+                        'Content-Type': 'application/json',
+                        'HTTP-Referer': window.location.href,
+                        'X-Title': 'API Test'
+                    },
+                    body: JSON.stringify({
+                        model: OPENROUTER_MODEL,
+                        messages: [
+                            {
+                                role: 'user',
+                                content: 'Say "Hello, API is working!" in JSON format: {"message": "your response"}'
+                            }
+                        ]
+                    })
+                });
+                
+                log(`Response Status: ${response.status} ${response.statusText}`, response.ok ? 'success' : 'error');
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    log('Error Response:', 'error');
+                    log(errorText, 'error');
+                    return;
+                }
+                
+                const data = await response.json();
+                log('✅ API Response Received!', 'success');
+                log('Full Response:');
+                log(JSON.stringify(data, null, 2));
+                
+                if (data.choices && data.choices[0]) {
+                    log('');
+                    log('AI Message:', 'success');
+                    log(data.choices[0].message.content);
+                }
+                
+            } catch (error) {
+                log('❌ Error:', 'error');
+                log(error.message, 'error');
+                log(error.stack, 'error');
+            }
+        }
+        
+        async function testAPI() {
+            clearOutput();
+            const claim = document.getElementById('testClaim').value;
+            
+            log('=== FULL API TEST ===', 'info');
+            log(`Testing claim: "${claim}"`);
+            log(`API URL: ${OPENROUTER_API_URL}`);
+            log(`Model: ${OPENROUTER_MODEL}`);
+            log('');
+            
+            try {
+                log('Sending request...', 'info');
+                
+                const prompt = `Analyze this news claim: "${claim}". Respond with JSON: {"label": "real" or "fake", "confidence": 0.0-1.0, "explanation": "brief explanation"}`;
+                
+                const response = await fetch(OPENROUTER_API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+                        'Content-Type': 'application/json',
+                        'HTTP-Referer': window.location.href,
+                        'X-Title': 'Fake News Detector Test'
+                    },
+                    body: JSON.stringify({
+                        model: OPENROUTER_MODEL,
+                        messages: [
+                            {
+                                role: 'user',
+                                content: prompt
+                            }
+                        ],
+                        temperature: 0.3,
+                        max_tokens: 1000
+                    })
+                });
+                
+                log(`Response Status: ${response.status} ${response.statusText}`, response.ok ? 'success' : 'error');
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    log('Error Response:', 'error');
+                    log(errorText, 'error');
+                    
+                    // Try to parse error JSON
+                    try {
+                        const errorJson = JSON.parse(errorText);
+                        log('');
+                        log('Parsed Error:', 'error');
+                        log(JSON.stringify(errorJson, null, 2), 'error');
+                    } catch (e) {
+                        // Not JSON, already logged
+                    }
+                    return;
+                }
+                
+                const data = await response.json();
+                log('✅ API Response Received!', 'success');
+                log('');
+                log('Full Response:');
+                log(JSON.stringify(data, null, 2));
+                
+                if (data.choices && data.choices[0]) {
+                    const content = data.choices[0].message.content;
+                    log('');
+                    log('AI Response:', 'success');
+                    log(content);
+                    
+                    // Try to extract JSON
+                    log('');
+                    log('Attempting to parse JSON...', 'info');
+                    const jsonMatch = content.match(/\{[\s\S]*?\}/);
+                    if (jsonMatch) {
+                        try {
+                            const parsed = JSON.parse(jsonMatch[0]);
+                            log('✅ Parsed Result:', 'success');
+                            log(JSON.stringify(parsed, null, 2), 'success');
+                        } catch (e) {
+                            log('❌ JSON Parse Error:', 'error');
+                            log(e.message, 'error');
+                        }
+                    } else {
+                        log('⚠️ No JSON found in response', 'error');
+                    }
+                }
+                
+            } catch (error) {
+                log('❌ Error:', 'error');
+                log(error.message, 'error');
+                log('');
+                log('Stack Trace:', 'error');
+                log(error.stack, 'error');
+            }
+        }
+    </script>
+</body>
+</html>
