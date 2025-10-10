@@ -74,7 +74,7 @@ const toggleHistoryBtn = document.getElementById('toggleHistoryBtn');
 const checkAnotherBtn = document.getElementById('checkAnotherBtn');
 
 // API base URL (frontend -> backend proxy)
-const API_BASE_URL = 'http://localhost:3000';
+const API_BASE_URL = 'https://fakenewsdetector-rho.vercel.app/';
 
 // ===== URL Detection Functions =====
 
