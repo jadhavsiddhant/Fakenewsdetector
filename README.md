@@ -306,4 +306,4 @@ For issues and questions:
 
 ---
 
-**Built with ❤️ using Vanilla JavaScript, Firebase, and Groq**
+**Built with ❤️ using JavaScript, Firebase, and Groq**
